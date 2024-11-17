@@ -1,3 +1,78 @@
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <WiFiClientSecure.h>
+
+// WiFi Ayarları
+const char *ssid = "Bilal";         // WiFi ağınızın adı
+const char *password = "bilal...."; // WiFi şifreniz
+
+// MQTT Broker Ayarları
+const char *mqtt_server = "8824e3a9df204b2098e07f76ba74b9aa.s1.eu.hivemq.cloud";
+const int mqtt_port = 8883;
+const char *mqtt_topic = "test/topic";
+const char *mqtt_username = "hivemq.webclient.1731763114191";
+const char *mqtt_password = "heKT$w@0517F*BI!Cgzl";
+
+WiFiClientSecure espClient;
+PubSubClient client(espClient);
+
+char data[100];
+
+void setup_wifi()
+{
+    delay(10);
+    Serial.println();
+    Serial.print("WiFi'ye bağlanılıyor: ");
+    Serial.println(ssid);
+
+    WiFi.begin(ssid, password);
+
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        Serial.print(".");
+    }
+
+    Serial.println("");
+    Serial.println("WiFi bağlantısı kuruldu.");
+    Serial.print("IP Adresi: ");
+    Serial.println(WiFi.localIP());
+}
+
+// MQTT Brokerına bağlanma fonksiyonu
+void reconnect()
+{
+    while (!client.connected())
+    {
+        Serial.print("MQTT Broker'a bağlanılıyor...");
+        if (client.connect("ESP32_Client", mqtt_username, mqtt_password))
+        {
+            Serial.println("Bağlantı başarılı!");
+        }
+        else
+        {
+            Serial.print("Bağlantı başarısız, hata kodu: ");
+            Serial.print(client.state());
+            Serial.println(" Yeniden dene...");
+            delay(5000);
+        }
+    }
+}
+
+char *create_json_string(int a, int b, int c, int d, int e, int f)
+{
+    // JSON formatında string oluştur
+    snprintf(data, sizeof(data), "{ \"a\": %d, \"b\": %d, \"c\": %d, \"d\": %d, \"e\": %d, \"f\": %d }", a, b, c, d, e, f);
+    return data; // Global değişken
+}
+
+int ort_temp_sol_ust = 0;
+int ort_temp_sag_ust = 0;
+int ort_temp_orta_ust = 0;
+int ort_temp_orta_alt = 0;
+int ort_temp_sol_alt = 0;
+int ort_temp_sag_alt = 0;
+
 int durum_sayisi = 1;
 int pozisyon_sayisi = 1;
 int alt_ust_matris_sayisi = 1;
@@ -69,6 +144,10 @@ int signal_pin[2][2];
 
 void setup()
 {
+    Serial.begin(9600);
+
+    setup_wifi();
+
     // tek tek yazılacak
     connect_pin[0][0] = 23;
     connect_pin[0][1] = 22;
@@ -87,6 +166,10 @@ void setup()
     en_pin[1][1] = 16;
     signal_pin[1][0] = 25;
     signal_pin[1][1] = 12;
+
+    // MQTT için güvenli bağlantı ayarları
+    espClient.setInsecure(); // SSL doğrulamasını devre dışı bırak
+    client.setServer(mqtt_server, mqtt_port);
 
     pinMode(connect_pin[0][0], OUTPUT);
     pinMode(connect_pin[0][1], OUTPUT);
@@ -262,6 +345,60 @@ void printt_dizi(int third_pointer, int row, int eleman_sayi)
     }
     Serial.print("}"); // 3 pointer
     delay(3);
+
+    ort_temp_sol_ust = 0;
+    ort_temp_sag_ust = 0;
+    ort_temp_orta_ust = 0;
+    ort_temp_orta_alt = 0;
+    ort_temp_sol_alt = 0;
+    ort_temp_sag_alt = 0; 
+    for (size_t h = 0; h < third_pointer; h++)
+    {
+        for (size_t i = 0; i < row; i++)
+        {
+            for (size_t j = 0; j < eleman_sayi; j++)
+            {
+                if (i <= 14) 
+                {
+                    if (j <= 12) // sol alt taraf
+                    {
+                        ort_temp_sol_alt += main_veri[h][i][j];
+                    }
+                    if (j > 12 && j < 19) // orta alt taraf
+                    {
+                        ort_temp_orta_alt += main_veri[h][i][j];
+                    }
+                    if (j >= 19 && j < 30) //  sol yukarı taraf
+                    {
+                        ort_temp_sol_ust += main_veri[h][i][j];
+                    }
+                }
+                if (i > 14 && i < 30) // sağ taraf
+                {
+                    if (j <= 12) // sağ alt
+                    {
+                        ort_temp_sag_alt += main_veri[h][i][j];
+                    }
+                    if (j > 12 && j < 19) // orta üst taraf
+                    {
+                        ort_temp_orta_ust += main_veri[h][i][j];
+                    }
+                    if (j >= 19 && j < 30) //  sağ yukarı taraf
+                    {
+                        ort_temp_sag_ust += main_veri[h][i][j];
+                    }
+                }
+            }
+        }
+    }
+    Serial.println(ort_temp_sol_ust);
+    Serial.println(ort_temp_sag_ust);
+    Serial.println(ort_temp_orta_ust);
+    Serial.println(ort_temp_orta_alt);
+    Serial.println(ort_temp_sol_alt);
+    Serial.println(ort_temp_sag_alt);
+
+    client.publish(mqtt_topic, create_json_string(int(ort_temp_sol_ust / (14 * 12)), int(ort_temp_orta_ust / (14 * 7)), int(ort_temp_sag_ust / (14 * 12)), int(ort_temp_sol_alt / (17 * 12)), int(ort_temp_orta_alt / (17 * 7)), int(ort_temp_sag_alt / (17 * 12))));
 }
 
 void setup2()
@@ -278,8 +415,8 @@ void setup2()
 void loop()
 {
     int setup_first = 1;
-    // int mod = 0; //-> veri toplama
-    int mod = 1; //-> veri işleme
+    int mod = 0; //-> veri toplama
+    // int mod = 1; //-> veri işleme
     if (mod == 0)
     {
         int f = 0;

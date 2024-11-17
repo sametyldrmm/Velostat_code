@@ -377,12 +377,12 @@ void degerlendicek_update(int ***veri)
 
 void printt_dizi(int third_pointer, int row, int eleman_sayi)
 {
-    int ort_temp_sol_ust = 0;
-    int ort_temp_sag_ust = 0;
-    int ort_temp_orta_ust = 0;
-    int ort_temp_orta_alt = 0;
-    int ort_temp_sol_alt = 0;
-    int ort_temp_sag_alt = 0; 
+    ort_temp_sol_ust = 0;
+    ort_temp_sag_ust = 0;
+    ort_temp_orta_ust = 0;
+    ort_temp_orta_alt = 0;
+    ort_temp_sol_alt = 0;
+    ort_temp_sag_alt = 0; 
     for (size_t h = 0; h < third_pointer; h++)
     {
         for (size_t i = 0; i < row; i++)
@@ -486,7 +486,7 @@ void loop()
         }
         // Serial.print("verilerimiz alindi");
         delay(3);
-        // verileri işle
+        // verileri işlegit 
         for (int h = 0; h < 1; h++)
         {
             for (int i = 0; i < 30; i++)
