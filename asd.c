@@ -423,12 +423,12 @@ void printt_dizi(int third_pointer, int row, int eleman_sayi)
             }
         }
     }
-    Serial.println(ort_temp_sol_ust)
-    Serial.println(ort_temp_sag_ust)
-    Serial.println(ort_temp_orta_ust)
-    Serial.println(ort_temp_orta_alt)
-    Serial.println(ort_temp_sol_alt)
-    Serial.println(ort_temp_sag_alt)
+    Serial.println(ort_temp_sol_ust);
+    Serial.println(ort_temp_sag_ust);
+    Serial.println(ort_temp_orta_ust);
+    Serial.println(ort_temp_orta_alt);
+    Serial.println(ort_temp_sol_alt);
+    Serial.println(ort_temp_sag_alt);
 
     client.publish(mqtt_topic, create_json_string(int(ort_temp_sol_ust / (14 * 12)), int(ort_temp_orta_ust / (14 * 7)), int(ort_temp_sag_ust / (14 * 12)), int(ort_temp_sol_alt / (17 * 12)), int(ort_temp_orta_alt / (17 * 7)), int(ort_temp_sag_alt / (17 * 12))));
     ort_temp_sol_ust = 0;
@@ -460,8 +460,8 @@ void loop()
     client.loop();
 
     int setup_first = 1;
-    // int mod = 0; //-> veri toplama
-    int mod = 1; //-> veri işleme
+    int mod = 0; //-> veri toplama
+    //int mod = 1; //-> veri işleme
     if (mod == 0)
     {
         int f = 0;
@@ -487,7 +487,7 @@ void loop()
         // Serial.print("verilerimiz alindi");
         delay(3);
         // verileri işle
-        for (int h = 0; k < 1; k++)
+        for (int h = 0; h < 1; h++)
         {
             for (int i = 0; i < 30; i++)
             {
