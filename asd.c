@@ -494,7 +494,10 @@ void loop()
                 for (int j = 0; j < 30; j++)
                 {
                     main_veri[h][i][j] = (temp[0][h][i][j] + temp[1][h][i][j] + temp[2][h][i][j] + temp[3][h][i][j] + temp[4][h][i][j] + temp[5][h][i][j]) / 6;
+                    Serial.print(main_veri[h][i][j]);
+                    Serial.print(" ");
                 }
+                Serial.println("");
             }
         }
 
